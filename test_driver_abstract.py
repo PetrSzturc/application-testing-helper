@@ -18,35 +18,45 @@ setup_logging()
 log = logging.getLogger(__name__)
 class Driver(object):
 
-    def __new__(
-        cls, 
+    def __init__(
+        self, 
         # driver_type
         ):
         mapping = {
-            "firefox": Firefox,
-            "chrome": Chrome,
-            "mobile": appium_driver,
+            "firefox": (Firefox, "browser"),
+            "chrome": (Chrome, "browser"),
+            "mobile": (appium_driver, "android"),
         }
         # try:            
             # eg return chrome instance or appium instance
-            # driver = mapping[driver_type]
+            # self.driver, self.locator_type = mapping[driver_type]
             # self.driver_type = driver_type
+            # self.driver = self.driver()
             # return driver()
         # except KeyError:
             # log.error(f"Tried to call driver {driver_type} which isn't configured.")
 
     def find_element(self, locator):
-
+        self.driver.find_element(*locator[self.locator_type])
         pass
 
-    @staticmethod
-    def firefox():
-        return Firefox(executable_path=GeckoDriverManager().install())
+    def firefox(self):
+        # move this here from init, so that I can call it like
+        # Driver().firefox()
+        self.locator_type = "browser"
+        # self.driver_type = driver_type
+        # self.driver = self.driver()
+        self.driver = Firefox(executable_path=GeckoDriverManager().install())
+        return self
 
 
 class AppElement(object):
-    pass
-
+    def __init__(
+        self,
+        android_locator = None,
+        browser_locator = None,
+        ):
+        self.browser_locator = browser_locator
 
 class BaseSCreen(object):
     def __init__(self, driver):
@@ -54,10 +64,12 @@ class BaseSCreen(object):
 
 
 class HomeScreen(BaseSCreen):
-    SEARCH_FIELD = (By.CSS_SELECTOR, 'div.search-form input[name=q].input')
+    SEARCH_FIELD = AppElement(
+        browser_locator=(By.CSS_SELECTOR, 'div.search-form input[name=q].input')
+        )
 
     def search(self, term):
-        search_field = self.driver.find_element(*HomeScreen.SEARCH_FIELD)
+        search_field = self.driver.find_element(HomeScreen.SEARCH_FIELD)
         search_field.send_keys("chata")
         search_field.send_keys(Keys.ENTER)
         sleep(2)
@@ -67,15 +79,16 @@ class BaseTest(object):
 
     def setup_method(self):
         log.info(f"Setup")
-        self.driver = Driver.firefox()
-        self.home_screen = HomeScreen(self.driver)
+        self.app = Driver()
+        self.app.firefox()
+        self.home_screen = HomeScreen(self.app)
 
-        self.driver.get("https://seznam.cz")
+        self.app.get("https://seznam.cz")
 
     def teardown_method(self):
         log.info("Closing")
-        self.driver.close()
-        self.driver.quit()
+        self.app.close()
+        self.app.quit()
 
 
 class TestSearch(BaseTest):
