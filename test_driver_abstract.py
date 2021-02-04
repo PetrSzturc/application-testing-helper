@@ -16,6 +16,8 @@ from selenium.webdriver.common.keys import Keys
 
 setup_logging()
 log = logging.getLogger(__name__)
+
+
 class Driver(object):
 
     def __init__(
@@ -37,17 +39,23 @@ class Driver(object):
             # log.error(f"Tried to call driver {driver_type} which isn't configured.")
 
     def find_element(self, locator):
-        self.driver.find_element(*locator[self.locator_type])
+        self.driver.find_element(*getattr(locator, self.locator_type))
         pass
 
     def firefox(self):
         # move this here from init, so that I can call it like
         # Driver().firefox()
-        self.locator_type = "browser"
+        self.locator_type = "browser_locator"
         # self.driver_type = driver_type
         # self.driver = self.driver()
         self.driver = Firefox(executable_path=GeckoDriverManager().install())
         return self
+
+    def get(self, url):
+        return self.driver.get(url)
+
+    def quit(self):
+        self.driver.quit()
 
 
 class AppElement(object):
@@ -57,6 +65,7 @@ class AppElement(object):
         browser_locator = None,
         ):
         self.browser_locator = browser_locator
+
 
 class BaseSCreen(object):
     def __init__(self, driver):
@@ -87,7 +96,6 @@ class BaseTest(object):
 
     def teardown_method(self):
         log.info("Closing")
-        self.app.close()
         self.app.quit()
 
 
