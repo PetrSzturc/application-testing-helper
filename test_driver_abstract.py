@@ -18,6 +18,9 @@ setup_logging()
 log = logging.getLogger(__name__)
 
 
+log.info(f"TODO: cleanup driver.driver and similar https://app.clickup.com/t/dn4ea9")
+
+
 class Driver(object):
 
     def __init__(
@@ -38,10 +41,6 @@ class Driver(object):
         # except KeyError:
             # log.error(f"Tried to call driver {driver_type} which isn't configured.")
 
-    def find_element(self, locator):
-        self.driver.find_element(*getattr(locator, self.locator_type))
-        pass
-
     def firefox(self):
         # move this here from init, so that I can call it like
         # Driver().firefox()
@@ -49,7 +48,7 @@ class Driver(object):
         # self.driver_type = driver_type
         # self.driver = self.driver()
         self.driver = Firefox(executable_path=GeckoDriverManager().install())
-        return self
+        # return self
 
     def get(self, url):
         return self.driver.get(url)
@@ -57,19 +56,36 @@ class Driver(object):
     def quit(self):
         self.driver.quit()
 
+    def find_element(self, locator):
+        pass
+        return self.driver.find_element(*getattr(locator, self.locator_type))
+        
+
 
 class AppElement(object):
-    def __init__(
-        self,
-        android_locator = None,
-        browser_locator = None,
-        ):
+
+    def __init__(self,
+                 browser_locator = None,
+                 android_locator = None,
+                 ios_locator = None
+                 ):
         self.browser_locator = browser_locator
+        self.android_locator = android_locator
+        self.ios_locator = ios_locator
+
+    def __get__(self, instance, owner):
+        locators_resolution = {
+            Chrome: self.browser_locator,
+            Firefox: self.browser_locator,
+            # Android: self.android_locator,
+            # Ios: self.ios_locator,
+        }
+        return instance.driver.find_element(self)
 
 
 class BaseSCreen(object):
-    def __init__(self, driver):
-        self.driver = driver
+    def __init__(self, object_with_driver):
+        self.driver = object_with_driver.driver
 
 
 class HomeScreen(BaseSCreen):
@@ -78,9 +94,12 @@ class HomeScreen(BaseSCreen):
         )
 
     def search(self, term):
-        search_field = self.driver.find_element(HomeScreen.SEARCH_FIELD)
-        search_field.send_keys("chata")
-        search_field.send_keys(Keys.ENTER)
+        # log.info(f"HomeScreen.SEARCH_FIELD: {HomeScreen.SEARCH_FIELD}")
+        # search_field = self.driver.find_element(HomeScreen.SEARCH_FIELD)
+        # search_field.send_keys("chata")
+        # search_field.send_keys(Keys.ENTER)
+        self.SEARCH_FIELD.send_keys("chata")
+        self.SEARCH_FIELD.send_keys(Keys.ENTER)
         sleep(2)
 
 
@@ -88,15 +107,16 @@ class BaseTest(object):
 
     def setup_method(self):
         log.info(f"Setup")
-        self.app = Driver()
-        self.app.firefox()
-        self.home_screen = HomeScreen(self.app)
+        self.driver = Driver()
+        self.driver.firefox()
+        self.home_screen = HomeScreen(self)
 
-        self.app.get("https://seznam.cz")
+        self.driver.get("https://seznam.cz")
 
     def teardown_method(self):
+        sleep(2)
         log.info("Closing")
-        self.app.quit()
+        self.driver.quit()
 
 
 class TestSearch(BaseTest):
