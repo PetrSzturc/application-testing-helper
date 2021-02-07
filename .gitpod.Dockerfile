@@ -8,4 +8,4 @@ FROM gitpod/workspace-full-vnc
 
 USER gitpod
 
-RUN sudo apt-get update -q && sudo apt-get install -yq firefox chromium-browser
+RUN sudo apt-get update -q && sudo apt-get install -yq firefox

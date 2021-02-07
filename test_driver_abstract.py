@@ -1,11 +1,15 @@
 from appium.webdriver import Remote as appium_driver
-from selenium.webdriver import Chrome, Firefox
+
+from selenium.webdriver import Firefox
+from selenium.webdriver import Chrome
+# from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
+# from webdriver_manager.utils import ChromeType
 
 import logging
 from time import sleep
@@ -39,6 +43,19 @@ class Driver(object):
         # TODO setup of platforms should be moved elsewhere
         self.platform_driver = Firefox(executable_path=GeckoDriverManager().install())
         return self
+
+    # def chromium(self):
+    #     # Installing chromium on ubuntu (run in the container) is currently problematic
+    #     #   so this doesn't work currently.
+    #     chrome_options = ChromeOptions()
+    #     chrome_options.add_argument("--no-sandbox")
+    #     chrome_options.add_argument("--disable-setuid-sandbox")
+    #     self.locator_type = "browser"
+    #     self.platform_driver = Chrome(
+    #         executable_path=ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install(),
+    #         options=chrome_options,
+    #         )
+    #     pass
 
     def go_to(self, url):
         self.platform_driver.get(url)
