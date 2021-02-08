@@ -14,7 +14,7 @@ RUN sudo apt-get update -q
 
 # Install Playwright dependencies
 # Webkit
-RUN sudo apt-get install libegl1\
+RUN sudo apt-get install -yq libegl1\
     libnotify4\
     libwoff1\
     libharfbuzz-icu0\
@@ -28,6 +28,6 @@ RUN sudo apt-get install libegl1\
     libgles2
 
 # Chromium
-RUN sudo apt-get install libnss3\
+RUN sudo apt-get install -yq libnss3\
     libnspr4\
     libgbm1
