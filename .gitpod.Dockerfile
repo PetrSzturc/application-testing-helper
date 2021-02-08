@@ -43,7 +43,7 @@ RUN sudo apt-get install -yq --no-install-recommends \
     libgles2
 
 # Chromium
-RUN sudo apt-get install -yq --no-install-recommends
+RUN sudo apt-get install -yq --no-install-recommends \
     libnss3\
     libnspr4\
     libgbm1
