@@ -5,4 +5,4 @@ pytest
 requests
 python-box
 PyYAML
-playwright
+playwright==1.8.0a1
