@@ -13,8 +13,23 @@ RUN sudo apt-get update -q
 # RUN sudo apt-get install -yq firefox chromium-browser
 
 # Install Playwright dependencies
+# Prepopulate debconf, otherwise gitpod stucks waiting for input
+RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
+RUN sudo apt-get -q update && sudo apt-get install -yq \
+    cmake fakeroot g++ gettext git libgtest-dev \
+    libcurl4-openssl-dev libqrencode-dev  libssl-dev libuuid1 \
+    libwxgtk3.0-gtk3-dev libxerces-c-dev libxt-dev libxtst-dev \
+    libykpers-1-dev libyubikey-dev make pkg-config uuid-dev zip \
+    libmagic-dev
+# Set debconf back to normal.
+RUN echo 'debconf debconf/frontend select Dialog' | sudo debconf-set-selections
+
+
+RUN sudo apt-get install -yq --no-install-recommends \
+    xvfb
 # Webkit
-RUN sudo apt-get install -yq libegl1\
+RUN sudo apt-get install -yq --no-install-recommends \
+    libegl1\
     libnotify4\
     libwoff1\
     libharfbuzz-icu0\
@@ -28,6 +43,7 @@ RUN sudo apt-get install -yq libegl1\
     libgles2
 
 # Chromium
-RUN sudo apt-get install -yq libnss3\
+RUN sudo apt-get install -yq --no-install-recommends
+    libnss3\
     libnspr4\
     libgbm1
