@@ -1,5 +1,3 @@
-selenium
-webdriver-manager
 Appium-Python-Client
 pytest
 requests
