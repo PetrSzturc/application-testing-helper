@@ -41,7 +41,16 @@ class Driver(object):
     def run_driver(self, driver_type: DriverType):
         # TODO This will be modified with appium and others as well in mind
         #  some logic to choose proper driver based on provided argument
-        self.platform_driver = CustomPlaywright(self).run(driver_type)
+        # 
+        mapping = {
+            Drivers.BROWSER: CustomPlaywright,
+            # Drivers.MOBILE: CustomAppium,
+        }
+        try:
+            driver_to_run = mapping[driver_type.platform_type]
+        except KeyError:
+            log.error(f"Driver {driver_type.name} was not properly configured or mapped.")
+        self.platform_driver = driver_to_run(self).run(driver_type)
         return self
 
 
@@ -51,8 +60,6 @@ class CustomPlaywright(object):
         unified_driver_instance
         ):
         self.unified_driver_instance = unified_driver_instance
-        
-        
         
     def _process_args(self):
         # process arguments based on self.unified_driver_instance
@@ -87,7 +94,6 @@ class CustomPlaywright(object):
         return new_tab
 
 
-
 ############################
 # with sync_playwright() as p:
     # browser = p.chromium.launch(headless=False)
@@ -95,11 +101,11 @@ class CustomPlaywright(object):
 
 common_driver = Driver()
 common_driver.run_driver(Drivers.CHROMIUM)
-platform_driver = common_driver.platform_driver
+driver = common_driver.platform_driver
 
-platform_driver.goto("https://seznam.cz")
-search_field = platform_driver.select_element('div.search-form input[name=q].input')
+driver.goto("https://seznam.cz")
+search_field = driver.select_element('div.search-form input[name=q].input')
 search_field.fill("chata")
 search_field.press('Enter')
 sleep(3)
-log.info(f"Title: {platform_driver.title()}")
+log.info(f"Title: {driver.title()}")
