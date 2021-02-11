@@ -1,7 +1,6 @@
 from playwright.sync_api import sync_playwright
 from playwright.sync_api import Page
 
-from typing import Union
 from time import sleep
 
 from pytest import fixture
@@ -13,23 +12,23 @@ from configuration import setup_logging
 setup_logging()
 log = logging.getLogger(__name__)
 
+class DriverType(object):
+    def __init__(self, platform_type, name):
+        self.platform_type = platform_type
+        self.name = name
 
-class Mapping(object):
-    # Maps platform with type of platforms
-    # Impacts how locators are resolved
-    browser = "browser"
-    mobile = "mobile"
-    firefox = browser
-    chromium = browser
-    webkit = browser
-    android = mobile
-    ios = mobile
-
-class Browsers(object):
-    firefox = "firefox"
-    chromium = "chromium"
-    webkit = "webkit"
-    all = (firefox, chromium, webkit)
+class Drivers(object):
+    # Or drivers configuration?
+    # Maps drivers for later use
+    # Impacts how drivers are started and locators are resolved
+    BROWSER = "browser"
+    MOBILE = "mobile"
+    FIREFOX = DriverType(BROWSER, "firefox")
+    CHROMIUM = DriverType(BROWSER, "chromium")
+    WEBKIT = DriverType(BROWSER, "webkit")
+    IOS = DriverType(MOBILE, "ios")
+    ANDROID = DriverType(MOBILE, "android")
+    all = (FIREFOX, CHROMIUM, WEBKIT, IOS, ANDROID)
 
 
 class Driver(object):
@@ -39,32 +38,21 @@ class Driver(object):
         self.locator_type = None
         self.headless = headless
 
-    def run_browser(self, browser: Union[Browsers.all]):
-        # TODO will see later if the other methods are useless and it's better to use this one directly
-        self.platform_driver = CustomPlaywright(browser, self).run()
-        # TODO resolve if calling .new_page() here makes sense - I would lose access to new_context() etc.
-        self.platform_driver = self.platform_driver.new_page()
-        self.locator_type = Mapping.browser
+    def run_driver(self, driver_type: DriverType):
+        # TODO This will be modified with appium and others as well in mind
+        #  some logic to choose proper driver based on provided argument
+        self.platform_driver = CustomPlaywright(self).run(driver_type)
         return self
 
 
 class CustomPlaywright(object):
     # Wrap around existing Playwright to customise it for running inside this framework
     def __init__(self, 
-        browser: str, 
         unified_driver_instance
         ):
         self.unified_driver_instance = unified_driver_instance
-        self._browser = sync_playwright().start()
-        self.browser = {
-            "firefox": self._browser.firefox, 
-            "chromium": self._browser.chromium,
-            "webkit": self._browser.webkit,
-            }.get(browser, "firefox")
         
-        # Remap any methods so they are the same across driver for the unified driver
-        # self.driver.search_element = self.driver.query_selector
-        # self.driver.go_to = self.goto
+        
         
     def _process_args(self):
         # process arguments based on self.unified_driver_instance
@@ -73,34 +61,45 @@ class CustomPlaywright(object):
         }
         return args
 
+    def _remap_methods(self, obj):
+        # Can be called only after new_page is called
+        # Remap any methods so they are the same across driver for the unified driver
+        # TODO think if those are good names
+        obj.select_element = obj.query_selector
+        obj.go_to = obj.goto
+        return obj
+
     def run(
         self, 
-        # browser,
+        browser: DriverType,
         ):
-        return self.browser.launch(**self._process_args())
+        self.unified_driver_instance.locator_type = browser.platform_type
+        self.playwright = sync_playwright().start()
+        browser_launcher = {
+            Drivers.FIREFOX: self.playwright.firefox, 
+            Drivers.CHROMIUM: self.playwright.chromium,
+            Drivers.WEBKIT: self.playwright.webkit,
+            }.get(browser, self.playwright.firefox)
+        
+        # TODO resolve if calling .new_page() here makes sense - I would lose access to new_context() etc.
+        new_tab = browser_launcher.launch(**self._process_args()).new_page()
+        new_tab = self._remap_methods(new_tab)
+        return new_tab
 
 
-# p = sync_playwright().start()
-# browser = p.chromium.launch(headless=False)
-# page = browser.new_page()
-
-# page.goto("http://seznam.cz")
-
-# sleep(3)
-# browser.close()
 
 ############################
 # with sync_playwright() as p:
     # browser = p.chromium.launch(headless=False)
     # driver = browser.new_page()
 
-driver = Driver()
-driver.run_browser(Browsers.chromium)
-browser = driver.platform_driver
+common_driver = Driver()
+common_driver.run_driver(Drivers.CHROMIUM)
+platform_driver = common_driver.platform_driver
 
-browser.goto("https://seznam.cz")
-search_field = browser.query_selector('div.search-form input[name=q].input')
+platform_driver.goto("https://seznam.cz")
+search_field = platform_driver.select_element('div.search-form input[name=q].input')
 search_field.fill("chata")
 search_field.press('Enter')
 sleep(3)
-log.info(f"Title: {browser.title()}")
+log.info(f"Title: {platform_driver.title()}")
