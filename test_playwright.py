@@ -30,10 +30,7 @@ class Driver(object):
 
     def run_driver(self, driver_type: DriverType):
         # TODO This will be modified with appium and other drivers in mind
-        try:
-            driver_to_run = driver_type.driver_to_run
-        except KeyError:
-            log.error(f"Driver {driver_type.name} was not properly configured or mapped.")
+        driver_to_run = driver_type.driver_to_run
         self.platform_driver = driver_to_run(self).run(driver_type)
         return self
 
