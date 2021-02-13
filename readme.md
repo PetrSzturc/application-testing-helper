@@ -10,12 +10,12 @@ Driver/s can be written for any part of the application/system/multiple applicat
 
 You can see [simplified structure here](https://miro.com/app/board/o9J_lezi47Y=/?moveToWidget=3074457354325395011&cot=14 "Miro")
 
-Tracking tasks, bugs, features at (private for now) https://app.clickup.com/2507589/v/b/s/6727213
+Tracking tasks, bugs, features at (private for now) [clickup](https://app.clickup.com/2507589/v/b/s/6727213)
 
 ## Repositories:
 
-* (main for now) https://gitlab.com/petrszturc/application-testing-helper
-* https://github.com/petrszturc/application-testing-helper
+* [gitlab](https://gitlab.com/petrszturc/application-testing-helper) 
+* [github](https://github.com/petrszturc/application-testing-helper)
 
 # Documentation:
 None yet.
