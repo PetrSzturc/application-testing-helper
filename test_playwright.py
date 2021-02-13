@@ -31,9 +31,17 @@ class Driver(object):
     def run_driver(self, driver_type: DriverType):
         # TODO This will be modified with appium and other drivers in mind
         driver_to_run = driver_type.driver_to_run
+        self.locator_type = driver_type.platform_type
         self.platform_driver = driver_to_run(self).run(driver_type)
         return self
 
+    def select_element(self, app_element):
+        # If called from/with AppElement, take correct platform locator from it
+        if isinstance(app_element, AppElement):
+            locator = getattr(app_element, self.locator_type)
+            return self.platform_driver.select_element(locator)
+        # If called with just locator:
+        return self.platform_driver.select_element(app_element)
 
 class CustomPlaywright(object):
     # Wrap around existing Playwright to customise it for running inside this framework
@@ -41,6 +49,7 @@ class CustomPlaywright(object):
         unified_driver_instance: Driver
         ):
         self.unified_driver_instance = unified_driver_instance
+
         
     def _process_args(self):
         # process arguments based on self.unified_driver_instance
@@ -61,7 +70,6 @@ class CustomPlaywright(object):
             self, 
             driver_type: DriverType,
         ):
-        self.unified_driver_instance.locator_type = driver_type.platform_type
         self.playwright = sync_playwright().start()
         browser_launcher = {
             Drivers.FIREFOX: self.playwright.firefox, 
@@ -70,9 +78,9 @@ class CustomPlaywright(object):
         }.get(driver_type, self.playwright.firefox)
         
         # TODO resolve if calling .new_page() here makes sense - I would lose access to new_context() etc.
-        new_tab = browser_launcher.launch(**self._process_args()).new_page()
-        new_tab = self._remap_methods(new_tab)
-        return new_tab
+        self.tab_instance = browser_launcher.launch(**self._process_args()).new_page()
+        self.tab_instance = self._remap_methods(self.tab_instance)
+        return self.tab_instance
 
 
 class Drivers(object):
@@ -89,61 +97,52 @@ class Drivers(object):
     all = (FIREFOX, CHROMIUM, WEBKIT, IOS, ANDROID)
 
 
-class Driver(object):
+class AppUi(object):
 
-    def __init__(self, headless=False):
-        self.platform_driver = None
-        self.locator_type = None
-        self.headless = headless
+    def __init__(self, common_driver: Driver):
+        self.common_driver = common_driver
+        self.platform_driver = self.common_driver.platform_driver
 
-    def run_driver(self, driver_type: DriverType):
-        # TODO This will be modified with appium and other drivers in mind
-        try:
-            driver_to_run = driver_type.driver_to_run
-        except KeyError:
-            log.error(f"Driver {driver_type.name} was not properly configured or mapped.")
-        self.platform_driver = driver_to_run(self).run(driver_type)
-        return self
+        self.home_screen = HomeScreen(self)
 
 
-class CustomPlaywright(object):
-    # Wrap around existing Playwright to customise it for running inside this framework
-    def __init__(self, 
-        unified_driver_instance
-        ):
-        self.unified_driver_instance = unified_driver_instance
-        
-    def _process_args(self):
-        # process arguments based on self.unified_driver_instance
-        args = {
-            "headless": self.unified_driver_instance.headless
-        }
-        return args
+class BaseScreen(object):
+    def __init__(self, app: AppUi):
+        self.common_driver = app.common_driver
+        self.platform_driver = app.platform_driver
 
-    def _remap_methods(self, obj):
-        # Can be called only after new_page is called
-        # Remap any methods so they are the same across driver for the unified driver
-        # TODO think if those are good names
-        obj.select_element = obj.query_selector
-        obj.go_to = obj.goto
-        return obj
 
-    def run(
-            self, 
-            driver_type: DriverType,
-        ):
-        self.unified_driver_instance.locator_type = driver_type.platform_type
-        self.playwright = sync_playwright().start()
-        browser_launcher = {
-            Drivers.FIREFOX: self.playwright.firefox, 
-            Drivers.CHROMIUM: self.playwright.chromium,
-            Drivers.WEBKIT: self.playwright.webkit,
-        }.get(driver_type, self.playwright.firefox)
-        
-        # TODO resolve if calling .new_page() here makes sense - I would lose access to new_context() etc.
-        new_tab = browser_launcher.launch(**self._process_args()).new_page()
-        new_tab = self._remap_methods(new_tab)
-        return new_tab
+class AppElement(object):
+
+    def __init__(self,
+                 browser = None,
+                 android = None,
+                 ios = None
+                 ):
+        self.browser = browser
+        self.android = android
+        self.ios = ios
+
+    def __get__(self, instance: BaseScreen, owner):
+        # Leave the platform resolution to Driver().
+        return instance.platform_driver.select_element(self)
+    
+    def is_displayed(self):
+        # I haven't found a way yet to make this working as I need the instance also here, or some other way to access the driver etc
+        if self is None:
+            return False
+            
+
+class HomeScreen(BaseScreen):
+    SEARCH_FIELD = AppElement(browser='div.search-form input[name=q].input')
+
+    def search(self, term: str):
+        self.SEARCH_FIELD.fill(term)
+        self.SEARCH_FIELD.press("Enter")
+
+    def wait_for_search_results(self):
+        # sleep(2)
+        pass
 
 
 ############################
@@ -151,13 +150,32 @@ class CustomPlaywright(object):
     # browser = p.chromium.launch(headless=False)
     # driver = browser.new_page()
 
-common_driver = Driver()
-common_driver.run_driver(Drivers.CHROMIUM)
-driver = common_driver.platform_driver
 
-driver.goto("https://seznam.cz")
-search_field = driver.select_element('div.search-form input[name=q].input')
-search_field.fill("chata")
-search_field.press('Enter')
-sleep(3)
-log.info(f"Title: {driver.title()}")
+@fixture
+def common_driver():
+    common_driver = Driver()
+    common_driver.run_driver(Drivers.FIREFOX)
+    common_driver.platform_driver.go_to("https://seznam.cz")
+    yield common_driver
+    # close browser
+
+
+@fixture
+def app(common_driver):
+    yield AppUi(common_driver)
+
+
+def test_simple_search(app):
+    app.home_screen.search("chata")
+    log.info(f"Title: {driver.title()}")
+
+# common_driver = Driver()
+# common_driver.run_driver(Drivers.CHROMIUM)
+# driver = common_driver.platform_driver
+
+# driver.goto("https://seznam.cz")
+# search_field = driver.select_element('div.search-form input[name=q].input')
+# search_field.fill("chata")
+# search_field.press('Enter')
+# sleep(3)
+# log.info(f"Title: {driver.title()}")
