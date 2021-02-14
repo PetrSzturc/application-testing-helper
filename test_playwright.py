@@ -168,6 +168,8 @@ def common_driver():
 def app(common_driver):
     appui = AppUi(common_driver)
     yield appui
+    log.info(f"Cleaning up.")
+    appui.platform_driver.close()
 
 
 def test_simple_search(app):
