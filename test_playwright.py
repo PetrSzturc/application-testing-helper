@@ -24,7 +24,7 @@ class DriverType(object):
 class Driver(object):
 # TODO a) this class should only control the others drivers, not have logic as "select element"
 #  or b) it has to have all the logic
-#  a) -> rename it as operator or something
+#  a) -> rename it: director, operator, driver runner
 #  b) -> wrap everything into here
 
     def __init__(self, headless=False):
