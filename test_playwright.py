@@ -22,6 +22,10 @@ class DriverType(object):
 
 
 class Driver(object):
+# TODO a) this class should only control the others drivers, not have logic as "select element"
+#  or b) it has to have all the logic
+#  a) -> rename it as operator or something
+#  b) -> wrap everything into here
 
     def __init__(self, headless=False):
         self.platform_driver = None
