@@ -125,7 +125,7 @@ class AppElement(object):
 
     def __get__(self, instance: BaseScreen, owner):
         # Leave the platform resolution to Driver().
-        return instance.platform_driver.select_element(self)
+        return instance.common_driver.select_element(self)
     
     def is_displayed(self):
         # I haven't found a way yet to make this working as I need the instance also here, or some other way to access the driver etc
@@ -153,21 +153,25 @@ class HomeScreen(BaseScreen):
 
 @fixture
 def common_driver():
+    log.info(f"Setting up test case.")
     common_driver = Driver()
     common_driver.run_driver(Drivers.FIREFOX)
     common_driver.platform_driver.go_to("https://seznam.cz")
-    yield common_driver
-    # close browser
+    return common_driver
 
 
 @fixture
 def app(common_driver):
-    yield AppUi(common_driver)
+    appui = AppUi(common_driver)
+    yield appui
 
 
 def test_simple_search(app):
     app.home_screen.search("chata")
-    log.info(f"Title: {driver.title()}")
+    sleep(2)
+    # app.common_driver.select_element('div.search-form input[name=q].input')
+    log.info(f"Title: {app.platform_driver.title()}")
+
 
 # common_driver = Driver()
 # common_driver.run_driver(Drivers.CHROMIUM)
