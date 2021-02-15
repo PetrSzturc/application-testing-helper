@@ -236,3 +236,10 @@ def test_simple_search(app):
     app.home_screen.search("chata")
     sleep(2)
     log.info(f"Title: {app.native_driver.tab.title()}")
+
+
+def test_search_with_app_elements(app):
+    app.home_screen.SEARCH_FIELD.fill("chata")
+    app.home_screen.SEARCH_FIELD.press("Enter")
+    sleep(2)
+    log.info(f"Title: {app.native_driver.tab.title()}")
