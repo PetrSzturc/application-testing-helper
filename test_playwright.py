@@ -14,14 +14,15 @@ from configuration import setup_logging
 setup_logging()
 log = logging.getLogger(__name__)
 
+
 class DriverType(object):
-    def __init__(self, platform_type, name, driver_to_run):
-        self.platform_type = platform_type
+    def __init__(self, locator_type, name, driver_to_run):
+        self.locator_type = locator_type
         self.name = name
         self.driver_to_run = driver_to_run
 
 
-class Driver(object):
+class Hat(object):
 # TODO a) this class should only control the others drivers, not have logic as "select element"
 #  or b) it has to have all the logic
 #  a) -> rename it: director, operator, driver runner
@@ -32,10 +33,10 @@ class Driver(object):
         self.locator_type = None
         self.headless = headless
 
-    def run_driver(self, driver_type: DriverType):
+    def start_platform(self, driver_type: DriverType):
         # TODO This will be modified with appium and other drivers in mind
         driver_to_run = driver_type.driver_to_run
-        self.locator_type = driver_type.platform_type
+        self.locator_type = driver_type.locator_type
         self.platform_driver = driver_to_run(self).run(driver_type)
         return self
 
@@ -47,20 +48,37 @@ class Driver(object):
         # If called with just locator:
         return self.platform_driver.select_element(app_element)
 
-class CustomPlaywright(object):
-    # Wrap around existing Playwright to customise it for running inside this framework
-    def __init__(self, 
-        unified_driver_instance: Driver
-        ):
-        self.unified_driver_instance = unified_driver_instance
 
-        
-    def _process_args(self):
-        # process arguments based on self.unified_driver_instance
-        args = {
-            "headless": self.unified_driver_instance.headless
+class BaseCustomDriver(object):
+
+    def __init__(self,
+        hat_instance: Hat,
+        ):
+        self.hat = hat_instance
+
+    
+    def _process_args(self,):
+        """
+        Takes any arguments and passes them
+        """
+        return {
+            "headless": self.hat.headless
         }
-        return args
+
+    def _remap_methods(self,):
+        log.warn(f"Implement me. {__name__}")
+
+
+    def open_app(self):
+        log.warn(f"Implement me. {__name__}")
+
+    # TODO Consider implementing this here with general way that would work with minimal work on custom driver itself
+    # def run(self,):
+    #     pass
+
+
+class CustomPlaywright(BaseCustomDriver):
+    # Wrap around existing Playwright to customise it for running inside this framework
 
     def _remap_methods(self, obj):
         # Can be called only after new_page is called
@@ -82,12 +100,14 @@ class CustomPlaywright(object):
         }.get(driver_type, self.playwright.firefox)
         
         # TODO resolve if calling .new_page() here makes sense - I would lose access to new_context() etc.
+        #  It doesnt, haha. Move it outside. = expose browser itself + tab itself. Yet todo.
         self.tab_instance = browser_launcher.launch(**self._process_args()).new_page()
         self.tab_instance = self._remap_methods(self.tab_instance)
         return self.tab_instance
 
 
 class Drivers(object):
+    # TODO should thi be just inside all the drivers...?
     # Or drivers configuration?
     # Maps drivers for later use
     # Impacts how drivers are started and locators are resolved
@@ -103,16 +123,16 @@ class Drivers(object):
 
 class AppUi(object):
 
-    def __init__(self, common_driver: Driver):
-        self.common_driver = common_driver
-        self.platform_driver = self.common_driver.platform_driver
+    def __init__(self, hat: Hat):
+        self.hat = hat
+        self.platform_driver = self.hat.platform_driver
 
         self.home_screen = HomeScreen(self)
 
 
 class BaseScreen(object):
     def __init__(self, app: AppUi):
-        self.common_driver = app.common_driver
+        self.hat = app.hat
         self.platform_driver = app.platform_driver
 
 
@@ -129,7 +149,7 @@ class AppElement(object):
 
     def __get__(self, instance: BaseScreen, owner):
         # Leave the platform resolution to Driver().
-        return instance.common_driver.select_element(self)
+        return instance.hat.select_element(self)
     
     def is_displayed(self):
         # I haven't found a way yet to make this working as I need the instance also here, or some other way to access the driver etc
@@ -156,17 +176,17 @@ class HomeScreen(BaseScreen):
 
 
 @fixture
-def common_driver():
+def hat():
     log.info(f"Setting up test case.")
-    common_driver = Driver()
-    common_driver.run_driver(Drivers.FIREFOX)
-    common_driver.platform_driver.go_to("https://seznam.cz")
-    return common_driver
+    hat = Hat()
+    hat.start_platform(Drivers.FIREFOX)
+    hat.platform_driver.go_to("https://seznam.cz")
+    return hat
 
 
 @fixture
-def app(common_driver):
-    appui = AppUi(common_driver)
+def app(hat):
+    appui = AppUi(hat)
     yield appui
     log.info(f"Cleaning up.")
     appui.platform_driver.close()
@@ -175,17 +195,4 @@ def app(common_driver):
 def test_simple_search(app):
     app.home_screen.search("chata")
     sleep(2)
-    # app.common_driver.select_element('div.search-form input[name=q].input')
     log.info(f"Title: {app.platform_driver.title()}")
-
-
-# common_driver = Driver()
-# common_driver.run_driver(Drivers.CHROMIUM)
-# driver = common_driver.platform_driver
-
-# driver.goto("https://seznam.cz")
-# search_field = driver.select_element('div.search-form input[name=q].input')
-# search_field.fill("chata")
-# search_field.press('Enter')
-# sleep(3)
-# log.info(f"Title: {driver.title()}")
