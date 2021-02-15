@@ -132,7 +132,8 @@ class CustomPlaywright(BaseCustomDriver):
         return self.tab
 
     def _close(self):
-        return self.native_driver.close()
+        self.native_driver.close()
+        self.playwright.stop()
         
     def _select_element(self, locator):
         # TODO Either here or in BaseCustomDriver implement logic to return AppElement instead of 'NoneType'
