@@ -1,13 +1,9 @@
-from playwright.sync_api import sync_playwright
-from playwright.sync_api import Page
-
-from appium import webdriver as appium_driver
-
+import logging
 from time import sleep
 
+from appium import webdriver as appium_driver
+from playwright.sync_api import sync_playwright
 from pytest import fixture
-
-import logging
 
 from configuration import setup_logging
 
@@ -38,9 +34,10 @@ class Hat(object):
 class BaseCustomDriver(object):
 
     def __init__(self,
-        hat_instance: Hat,
-        ):
-        self.hat = hat_instance  # Used to have access to any arguments passed from above even without passing them explicitly
+                 hat_instance: Hat,
+                 ):
+        # Used to have access to any arguments passed from above even without passing them explicitly
+        self.hat = hat_instance
         self.locator_type = None
         # TODO Consider if this is correct name or: platform_driver or something else
         self.native_driver = None
@@ -61,7 +58,8 @@ class BaseCustomDriver(object):
 
     def _start(self, driver_to_start: DriverType):
         # Warn if new driver doesn't have this method implemented.
-        log.warning(f"Implement me: {__name__}. Return type should be object to be called; able to .open_app method and control the platform overall. See .start method.")
+        log.warning(f"Implement me: {__name__}. Return type should be object to be called;"
+                    "able to .open_app method and control the platform overall. See .start method.")
         pass
 
     def start(self, driver_to_start: DriverType):
@@ -69,7 +67,7 @@ class BaseCustomDriver(object):
         # run method returned by _start and pass arguments to it
         self.native_driver = self._start(driver_to_start)(**self._process_args())
         return self
-    
+
     def open_app(self,):
         # Warn if new driver doesn't have this method implemented.
         log.warning(f"Implement me: {__name__}.")
@@ -77,7 +75,7 @@ class BaseCustomDriver(object):
 
     def select_element(self, app_element):  # -> AppElement:
         """It is preffered to call this method with AppElement type.\n
-        Though for easy use it supports 
+        Though for easy use it supports
         """
         log.debug(f"Looking for element: {app_element}")
         if isinstance(app_element, AppElement):
@@ -103,7 +101,7 @@ class BaseCustomDriver(object):
         # Warn if new driver doesn't have this method implemented.
         log.warning(f"Implement me: {__name__}")
         pass
-        
+
 
 class CustomPlaywright(BaseCustomDriver):
     # Wrap around existing Playwright to customise it for running inside this framework
@@ -111,7 +109,6 @@ class CustomPlaywright(BaseCustomDriver):
     def _remap_methods(self, obj):
 
         # Can be called only after new_page is called
-        # 
         obj.go_to = obj.goto
         return obj
 
@@ -119,7 +116,7 @@ class CustomPlaywright(BaseCustomDriver):
         # Start playwright
         self.playwright = sync_playwright().start()
         browser_launcher = {
-            Drivers.FIREFOX: self.playwright.firefox, 
+            Drivers.FIREFOX: self.playwright.firefox,
             Drivers.CHROMIUM: self.playwright.chromium,
             Drivers.WEBKIT: self.playwright.webkit,
         }.get(driver_to_start, self.playwright.firefox)
@@ -134,10 +131,11 @@ class CustomPlaywright(BaseCustomDriver):
     def _close(self):
         self.native_driver.close()
         self.playwright.stop()
-        
+
     def _select_element(self, locator):
         # TODO Either here or in BaseCustomDriver implement logic to return AppElement instead of 'NoneType'
         return self.tab.query_selector(locator)
+
 
 class Drivers(object):
     # TODO should some of this be just inside all the drivers...?
@@ -170,9 +168,9 @@ class BaseScreen(object):
 class AppElement(object):
 
     def __init__(self,
-                 browser = None,
-                 android = None,
-                 ios = None
+                 browser=None,
+                 android=None,
+                 ios=None
                  ):
         self.browser = browser
         self.android = android
@@ -187,12 +185,13 @@ class AppElement(object):
 
     def __repr__(self):
         return self.__str__()
-    
+
     def is_displayed(self):
-        # I haven't found a way yet to make this working as I need the instance also here, or some other way to access the driver etc
+        # I haven't found a way yet to make this working as I need the instance also here,
+        #  or some other way to access the driver etc
         if self is None:
             return False
-            
+
 
 class HomeScreen(BaseScreen):
     SEARCH_FIELD = AppElement(browser='div.search-form input')
