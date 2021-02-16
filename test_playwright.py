@@ -16,8 +16,8 @@ class DriverType(object):
 
 
 class Hat(object):
-    """Runner and coordinator that sits on top - hence the name. Plus hat=helper for application testing, haha.\n
-    For now takes care of running individual platforms and their drivers.
+    """Runner and coordinator, controls running individual platforms and their drivers\n
+    Sits on top - hence the name. Plus hat=helper for application testing, haha.
     """
     # TODO a) this class should only control the others drivers, not have logic as "select element"
     #  or b) it has to have all the logic
@@ -44,7 +44,7 @@ class BaseCustomDriver(object):
 
     def _process_args(self,):
         """
-        Takes any arguments and passes them
+        Takes arguments, attributes, parameters from Hat and passes them to drivers.
         """
         return {
             "headless": self.hat.headless,
