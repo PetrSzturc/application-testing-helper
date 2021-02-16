@@ -244,3 +244,10 @@ def test_search_with_app_elements(app):
     app.home_screen.SEARCH_FIELD.press("Enter")
     sleep(2)
     log.info(f"Title: {app.native_driver.tab.title()}")
+
+
+def test_locators(app):
+    search_field = app.native_driver.select_element('input[name="q"]')
+    search_field.fill("chata")
+    search_field.press("Enter")
+    log.info(f"Title: {app.native_driver.tab.title()}")
