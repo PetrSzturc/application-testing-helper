@@ -59,12 +59,10 @@ def setup_logging(log_config_filepath=None,
         log = logging.getLogger(__name__)
 
         log.error(f"Couldn't load logging configuration from '{log_config_filepath}'. "
-                     "Used default configuration. "
-                     f"Logs: {logs_location} "
-                     f"Level: {logging_level} "
-                     )
+                  f"Used default configuration. "
+                  f"Logs: {logs_location} "
+                  f"Level: {logging_level} ")
     log = logging.getLogger(__name__)
-    log.info(f"##### New session #####")
 
 
 def load_config(profile):
