@@ -194,7 +194,8 @@ class AppElement(object):
 
 
 class HomeScreen(BaseScreen):
-    SEARCH_FIELD = AppElement(browser='div.search-form input')
+    SEARCH_FIELD = AppElement(browser='input[name="q"]')  # Google
+    # SEARCH_FIELD = AppElement(browser='div.search-form input')  # Seznam
 
     def search(self, term: str):
         self.SEARCH_FIELD.fill(term)
@@ -224,7 +225,8 @@ def hat():
 @fixture
 def app(hat: Hat):
     native_driver = hat.start_platform(Drivers.FIREFOX)
-    native_driver.open_app(f"https://seznam.cz")
+    native_driver.open_app(f"https://google.com")
+    # native_driver.open_app(f"https://seznam.cz")
     appui = AppUi(native_driver)
     yield appui
     log.info(f"Cleaning up.")
