@@ -9,6 +9,10 @@ from configuration import setup_logging
 
 
 class DriverType(object):
+    """
+    .locator_type: Name of the attribute to get the locator from, e.g. browser, ios, android.
+    .driver_to_start: Class that can be called to start the platform (driver).
+    """
     def __init__(self, locator_type, name, driver_to_start):
         self.locator_type = locator_type
         self.name = name
@@ -58,8 +62,8 @@ class BaseCustomDriver(object):
 
     def _start(self, driver_to_start: DriverType):
         # Warn if new driver doesn't have this method implemented.
-        log.warning(f"Implement me: {__name__}. Return type should be object to be called;"
-                    "able to .open_app method and control the platform overall. See .start method.")
+        log.warning(f"Implement me: {__name__}. Return type should be callable object;"
+                    f"able to .open_app and control the platform overall. See .start method.")
         pass
 
     def start(self, driver_to_start: DriverType):
@@ -143,12 +147,11 @@ class Drivers(object):
     # Maps drivers for later use
     # Impacts how drivers are started and locators are resolved
     BROWSER = "browser"
-    MOBILE = "mobile"
     FIREFOX = DriverType(BROWSER, "firefox", CustomPlaywright)
     CHROMIUM = DriverType(BROWSER, "chromium", CustomPlaywright)
     WEBKIT = DriverType(BROWSER, "webkit", CustomPlaywright)
-    IOS = DriverType(MOBILE, "ios", appium_driver)
-    ANDROID = DriverType(MOBILE, "android", appium_driver)
+    IOS = DriverType("ios", "ios", appium_driver)
+    ANDROID = DriverType("android", "android", appium_driver)
     all = (FIREFOX, CHROMIUM, WEBKIT, IOS, ANDROID)
 
 
@@ -170,11 +173,14 @@ class AppElement(object):
     def __init__(self,
                  browser=None,
                  android=None,
-                 ios=None
+                 ios=None,
+                 locator_dict: dict = None,
                  ):
         self.browser = browser
         self.android = android
         self.ios = ios
+        self.locator_dict = locator_dict
+        self._process_locator_dict()
 
     def __get__(self, instance: BaseScreen, owner):
         # Leave the platform resolution to Driver().
@@ -185,6 +191,11 @@ class AppElement(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def _process_locator_dict(self):
+        if self.locator_dict:
+            for locator_type, locator in self.locator_dict.items():
+                setattr(self, locator_type, locator)
 
     def is_displayed(self):
         # I haven't found a way yet to make this working as I need the instance also here,
@@ -206,12 +217,6 @@ class HomeScreen(BaseScreen):
         pass
 
 
-############################
-# with sync_playwright() as p:
-    # browser = p.chromium.launch(headless=False)
-    # driver = browser.new_page()
-
-
 setup_logging()
 log = logging.getLogger(__name__)
 
@@ -219,12 +224,12 @@ log = logging.getLogger(__name__)
 @fixture
 def hat():
     log.info(f"Setting up test case.")
-    return Hat()
+    return Hat(headless=False)
 
 
 @fixture
 def app(hat: Hat):
-    native_driver = hat.start_platform(Drivers.FIREFOX)
+    native_driver = hat.start_platform(Drivers.CHROMIUM)
     native_driver.open_app(f"https://google.com")
     # native_driver.open_app(f"https://seznam.cz")
     appui = AppUi(native_driver)
@@ -246,8 +251,17 @@ def test_search_with_app_elements(app):
     log.info(f"Title: {app.native_driver.tab.title()}")
 
 
-def test_locators(app):
+def test_directly_using_locators(app):
     search_field = app.native_driver.select_element('input[name="q"]')
+    search_field.fill("chata")
+    search_field.press("Enter")
+    log.info(f"Title: {app.native_driver.tab.title()}")
+
+
+def test_app_element_locators_specified_with_dictionary(app):
+    search_field_element = AppElement(locator_dict={"browser": "input[name='q']"})
+    log.info(search_field_element.__dict__)
+    search_field = app.native_driver.select_element(search_field_element.browser)
     search_field.fill("chata")
     search_field.press("Enter")
     log.info(f"Title: {app.native_driver.tab.title()}")
