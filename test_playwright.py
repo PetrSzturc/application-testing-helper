@@ -209,7 +209,7 @@ class HomeScreen(BaseScreen):
     # SEARCH_FIELD = AppElement(browser='div.search-form input')  # Seznam
 
     def search(self, term: str):
-        self.SEARCH_FIELD.fill(term)
+        self.SEARCH_FIELD.type(term)
         self.SEARCH_FIELD.press("Enter")
 
     def wait_for_search_results(self):
@@ -238,14 +238,14 @@ def app(hat: Hat):
     native_driver.close()
 
 
-def test_simple_search(app):
+def test_simple_search(app: AppUi):
     app.home_screen.search("chata")
     sleep(2)
     log.info(f"Title: {app.native_driver.tab.title()}")
 
 
 def test_search_with_app_elements(app):
-    app.home_screen.SEARCH_FIELD.fill("chata")
+    app.home_screen.SEARCH_FIELD.type("chata")
     app.home_screen.SEARCH_FIELD.press("Enter")
     sleep(2)
     log.info(f"Title: {app.native_driver.tab.title()}")
@@ -253,7 +253,7 @@ def test_search_with_app_elements(app):
 
 def test_directly_using_locators(app):
     search_field = app.native_driver.select_element('input[name="q"]')
-    search_field.fill("chata")
+    search_field.type("chata")
     search_field.press("Enter")
     log.info(f"Title: {app.native_driver.tab.title()}")
 
@@ -262,6 +262,6 @@ def test_app_element_locators_specified_with_dictionary(app):
     search_field_element = AppElement(locator_dict={"browser": "input[name='q']"})
     log.info(search_field_element.__dict__)
     search_field = app.native_driver.select_element(search_field_element.browser)
-    search_field.fill("chata")
+    search_field.type("chata")
     search_field.press("Enter")
     log.info(f"Title: {app.native_driver.tab.title()}")

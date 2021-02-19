@@ -1,11 +1,18 @@
-from base.screen import BaseScreen, AppElement, Locator
-from selenium.webdriver.common.by import By
+from app_screens import BaseScreen
 
 
 class HomeScreen(BaseScreen):
-    home_button = AppElement(browser_locator=Locator(By.CSS_SELECTOR, "button.home"),
-                             android_locator=Locator(By.CLASS_NAME, "com.button.home"),
-                             )
-    login_link = AppElement(browser_locator=Locator(By.CSS_SELECTOR, "a.login"),
-                            android_locator=Locator(By.CSS_SELECTOR, "com.link.login"),
-                            )
+    SEARCH_FIELD = AppElement(
+        browser='input[name="q"]',
+        android='//xpath',
+        ios='XCUITestElementField.search',
+        )  # Google
+    # SEARCH_FIELD = AppElement(browser='div.search-form input')  # Seznam
+
+    def search(self, term: str):
+        self.SEARCH_FIELD.fill(term)
+        self.SEARCH_FIELD.press("Enter")
+
+    def wait_for_search_results(self):
+        # sleep(2)
+        pass
