@@ -77,23 +77,23 @@ class BaseCustomDriver(object):
         log.warning(f"Implement me: {__name__}.")
         pass
 
-    def select_element(self, app_element):  # -> AppElement:
+    def get_element(self, app_element):  # -> AppElement:
         """It is preffered to call this method with AppElement type.\n
         Though for easy use it supports
         """
         log.debug(f"Looking for element: {app_element}")
         if isinstance(app_element, AppElement):
-            return self._select_element(getattr(app_element, self.locator_type))
+            return self._get_element(getattr(app_element, self.locator_type))
         # If called with just locator:
-        return self._select_element(app_element)
+        return self._get_element(app_element)
 
-    def _select_element(self, locator):  # -> AppElement:
+    def _get_element(self, locator):  # -> AppElement:
         # Warn if new driver doesn't have this method implemented.
         log.warning(f"Implement me: {__name__}.")
         # implement here calling the native driver method for finding/selecting element
         # e.g. for playwright you would simply put here
         #  return self.tab.query_selector(locator)
-        # you may need to process the locator in some way, coming from self.select_element()
+        # you may need to process the locator in some way, coming from self.get_element()
         # you should also implement logic to always return (new instance) AppElement even if the element is not present
         #  and set it with proper attributes like .is_present = False/True, .is_displayed = False/True ...
         pass
@@ -136,7 +136,7 @@ class CustomPlaywright(BaseCustomDriver):
         self.native_driver.close()
         self.playwright.stop()
 
-    def _select_element(self, locator):
+    def _get_element(self, locator):
         # TODO Either here or in BaseCustomDriver implement logic to return AppElement instead of 'NoneType'
         return self.tab.query_selector(locator)
 
@@ -184,7 +184,7 @@ class AppElement(object):
 
     def __get__(self, instance: BaseScreen, owner):
         # Leave the platform resolution to Driver().
-        return instance.native_driver.select_element(self)
+        return instance.native_driver.get_element(self)
 
     def __str__(self):
         return str({"AppElement": self.__dict__})
@@ -252,7 +252,7 @@ def test_search_with_app_elements(app):
 
 
 def test_directly_using_locators(app):
-    search_field = app.native_driver.select_element('input[name="q"]')
+    search_field = app.native_driver.get_element('input[name="q"]')
     search_field.type("chata")
     search_field.press("Enter")
     log.info(f"Title: {app.native_driver.tab.title()}")
@@ -261,7 +261,7 @@ def test_directly_using_locators(app):
 def test_app_element_locators_specified_with_dictionary(app):
     search_field_element = AppElement(locator_dict={"browser": "input[name='q']"})
     log.info(search_field_element.__dict__)
-    search_field = app.native_driver.select_element(search_field_element.browser)
+    search_field = app.native_driver.get_element(search_field_element.browser)
     search_field.type("chata")
     search_field.press("Enter")
     log.info(f"Title: {app.native_driver.tab.title()}")

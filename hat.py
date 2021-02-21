@@ -1,4 +1,4 @@
-from drivers.base_driver import DriverType
+from drivers.drivers import DriverType
 
 
 class Hat(object):
@@ -10,5 +10,5 @@ class Hat(object):
     def __init__(self,):
         pass
 
-    def start_platform(self, driver_type: DriverType):
-        return driver_type.driver_to_start(self).start(driver_type)
+    def start_platform(self, driver_type: DriverType, **kwargs):
+        return driver_type.driver_to_start(self).start(driver_type, **kwargs)

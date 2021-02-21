@@ -1,17 +1,3 @@
-from drivers import BaseCustomDriver
-from app_screens import BaseScreen
-
-
-class AppUi(object):
-
-    def __init__(
-        self,
-        native_driver#: BaseCustomDriver,
-    ):
-        self.native_driver = native_driver
-
-        self.home_screen = HomeScreen(self)
-
 
 class AppElement(object):
 
@@ -27,9 +13,13 @@ class AppElement(object):
         self.locator_dict = locator_dict
         self._process_locator_dict()
 
-    def __get__(self, instance: BaseScreen, owner):
+    def __get__(
+                self,
+                instance,  #: app_screens.base_screen.BaseScreen,
+                owner,
+                ):
         # Leave the platform resolution to Driver().
-        return instance.native_driver.select_element(self)
+        return instance.native_driver.get_element(self)
 
     def __str__(self):
         return str({"AppElement": self.__dict__})

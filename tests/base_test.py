@@ -1,7 +1,7 @@
 import logging
 
 from application import AppUi
-from drivers import Drivers
+from configuration import Drivers
 from hat import Hat
 
 
@@ -11,7 +11,7 @@ class BaseTest(object):
         self.log = logging.getLogger(__name__)
         self.log.info(f"Test case setup")
         self.hat = Hat(headless=False)
-        self.native_driver = hat.start_platform(Drivers.CHROMIUM)
+        self.native_driver = self.hat.start_platform(Drivers.CHROMIUM)
         self.native_driver.open_app(f"https://google.com")
         self.app = AppUi(self.native_driver)
 

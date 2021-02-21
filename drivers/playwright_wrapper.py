@@ -2,7 +2,9 @@ import logging
 
 from playwright.sync_api import sync_playwright
 
-from drivers import BaseCustomDriver
+# from configuration import Drivers
+from drivers.drivers import BaseCustomDriver
+
 
 log = logging.getLogger(__name__)
 
@@ -16,15 +18,18 @@ class CustomPlaywright(BaseCustomDriver):
         obj.go_to = obj.goto
         return obj
 
-    def _start(self, driver_to_start: DriverType,):
-        # Start playwright
-        self.playwright = sync_playwright().start()
-        browser_launcher = {
-            Drivers.FIREFOX: self.playwright.firefox,
-            Drivers.CHROMIUM: self.playwright.chromium,
-            Drivers.WEBKIT: self.playwright.webkit,
-        }.get(driver_to_start, self.playwright.firefox)
-        return browser_launcher.launch
+    # def _start(
+    #             self,
+    #             driver_to_start  #: DriverType,
+    #             ):
+    #     # Start playwright
+    #     self.playwright = sync_playwright().start()
+    #     browser_launcher = {
+    #         Drivers.FIREFOX: self.playwright.firefox,
+    #         Drivers.CHROMIUM: self.playwright.chromium,
+    #         Drivers.WEBKIT: self.playwright.webkit,
+    #     }.get(driver_to_start, self.playwright.firefox)
+    #     return browser_launcher.launch
 
     def _open_app(self, url: str):
         # TODO Rewrite this with loading url from configuration
@@ -37,6 +42,17 @@ class CustomPlaywright(BaseCustomDriver):
         self.native_driver.close()
         self.playwright.stop()
 
-    def _select_element(self, locator):
+    def _get_element(self, locator):
         # TODO Either here or in BaseCustomDriver implement logic to return AppElement instead of 'NoneType'
         return self.tab.query_selector(locator)
+
+
+class Firefox(CustomPlaywright):
+
+    def _start(
+                self,
+                driver_to_start  #: DriverType,
+                ):
+        # Start playwright
+        self.playwright = sync_playwright().start()
+        return self.playwright.firefox.launch

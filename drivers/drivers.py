@@ -1,7 +1,13 @@
-from application import AppUi
-from drivers.playwright_wrapper import CustomPlaywright
+import logging
+
+# from application import AppUi
+# from drivers.playwright_wrapper import CustomPlaywright
 # TODO Watch for circular imports
-from hat import Hat
+# from hat import Hat
+from app_element import AppElement
+
+
+log = logging.getLogger(__name__)
 
 
 class DriverType(object):
@@ -15,24 +21,10 @@ class DriverType(object):
         self.driver_to_start = driver_to_start
 
 
-class Drivers(object):
-    # TODO should some of this be just inside all the drivers...?
-    # TODO Rename to drivers configuration?
-    # Maps drivers for later use
-    # Impacts how drivers are started and locators are resolved
-    BROWSER = "browser"
-    FIREFOX = DriverType(BROWSER, "firefox", CustomPlaywright)
-    CHROMIUM = DriverType(BROWSER, "chromium", CustomPlaywright)
-    WEBKIT = DriverType(BROWSER, "webkit", CustomPlaywright)
-    IOS = DriverType("ios", "ios", appium_driver)
-    ANDROID = DriverType("android", "android", appium_driver)
-    all = (FIREFOX, CHROMIUM, WEBKIT, IOS, ANDROID)
-
-
 class BaseCustomDriver(object):
 
     def __init__(self,
-                 hat_instance: Hat,
+                 hat_instance  #: Hat,
                  ):
         # Used to have access to any arguments passed from above even without passing them explicitly
         self.hat = hat_instance
@@ -70,27 +62,26 @@ class BaseCustomDriver(object):
         log.warning(f"Implement me: {__name__}.")
         pass
 
-    def open_app(self, native_driver):
-        self._open_app(native_driver)
-        return AppUi(self.native_driver)
+    def open_app(self, url):
+        self._open_app(url)
 
-    def select_element(self, app_element):  # -> AppElement:
+    def get_element(self, app_element):  # -> AppElement:
         """It is preffered to call this method with AppElement type.\n
-        Though for easy use it supports
+        Though for easy use it supports calls with just locators as well.
         """
         log.debug(f"Looking for element: {app_element}")
         if isinstance(app_element, AppElement):
-            return self._select_element(getattr(app_element, self.locator_type))
+            return self._get_element(getattr(app_element, self.locator_type))
         # If called with just locator:
-        return self._select_element(app_element)
+        return self._get_element(app_element)
 
-    def _select_element(self, locator):  # -> AppElement:
+    def _get_element(self, locator):  # -> AppElement:
         # Warn if new driver doesn't have this method implemented.
         log.warning(f"Implement me: {__name__}.")
         # implement here calling the native driver method for finding/selecting element
         # e.g. for playwright you would simply put here
         #  return self.tab.query_selector(locator)
-        # you may need to process the locator in some way, coming from self.select_element()
+        # you may need to process the locator in some way, coming from self.get_element()
         # you should also implement logic to always return (new instance) AppElement even if the element is not present
         #  and set it with proper attributes like .is_present = False/True, .is_displayed = False/True ...
         pass
