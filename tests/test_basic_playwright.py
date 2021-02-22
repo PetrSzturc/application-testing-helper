@@ -21,7 +21,7 @@ def hat():
 
 @fixture
 def app(hat: Hat):
-    native_driver = hat.start_platform(Drivers.FIREFOX, headless=True)
+    native_driver = hat.start_platform(Drivers.FIREFOX, headless=False)
     native_driver.open_app(f"https://google.com")
     # native_driver.open_app(f"https://seznam.cz")
     appui = AppUi(native_driver)
