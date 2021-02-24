@@ -19,7 +19,7 @@ class AppElement(object):
                 owner,
                 ):
         # Leave the platform resolution to Driver().
-        return instance.native_driver.get_element(self)
+        return instance.platform_driver.get_element(self)
 
     def __str__(self):
         return str({"AppElement": self.__dict__})

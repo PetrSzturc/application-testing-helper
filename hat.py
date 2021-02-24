@@ -1,4 +1,8 @@
-from drivers.drivers import DriverType
+from configuration import RegisteredDrivers
+import logging
+
+
+log = logging.getLogger(__name__)
 
 
 class Hat(object):
@@ -10,5 +14,6 @@ class Hat(object):
     def __init__(self,):
         pass
 
-    def start_platform(self, driver_type: DriverType, **kwargs):
-        return driver_type.driver_to_start(self).start(driver_type, **kwargs)
+    def start_platform(self, driver_to_start: str, **kwargs):
+        driver = RegisteredDrivers.get_driver_by_name(driver_to_start)
+        return driver().start(**kwargs)

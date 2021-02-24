@@ -6,8 +6,8 @@ class AppUi(object):
 
     def __init__(
         self,
-        native_driver: drivers.BaseCustomDriver,
+        platform_driver: drivers.BaseCustomDriver,
     ):
-        self.native_driver = native_driver
+        self.platform_driver = platform_driver
 
         self.home_screen = app_screens.home.HomeScreen(self)

@@ -1,4 +1,5 @@
 import logging
+from abc import ABC, abstractmethod
 
 # from application import AppUi
 # from drivers.playwright_wrapper import CustomPlaywright
@@ -10,25 +11,48 @@ from app_element import AppElement
 log = logging.getLogger(__name__)
 
 
-class DriverType(object):
-    """
-    .locator_type: Name of the attribute to get the locator from, e.g. browser, ios, android.
-    .driver_to_start: Class that can be called to start the platform (driver).
-    """
-    def __init__(self, locator_type, name, driver_to_start):
-        self.locator_type = locator_type
-        self.name = name
-        self.driver_to_start = driver_to_start
+class AbstractDriver(ABC):
+
+    @abstractmethod
+    def _start(self, driver_to_start,):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _open_app(self, *args, **kwargs,):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _get_element(self, locator,):
+        raise NotImplementedError
+
+    # @abstractmethod
+    # def _set_driver(self,):
+    #     raise NotImplementedError
 
 
-class BaseCustomDriver(object):
+class BaseCustomDriver(AbstractDriver):
+    """Basic implementation with all methods that should every driver support.
+
+    This class should be used to inherit from and implement needed methods.
+    You will get warning messages in logs in case a method is missing implementation.
+    You should also set all needed attributes per driver implementation.
+
+    Attributes:
+    locator_type : str
+        Identifies what attribute to select from AppElement by its name.
+    name : str
+        String by which drivers are resolved to be used for tests. By default set to name of the class.
+    """
+
+    # TODO implement these also into abstract class if possible
+    name: str
+    locator_type: str
 
     def __init__(self,
-                 hat_instance  #: Hat,
                  ):
         # Used to have access to any arguments passed from above even without passing them explicitly
-        self.hat = hat_instance
-        self.locator_type = None
+        self.locator_type = self.locator_type
+        self.name = self.name
         # TODO Consider if this is correct name or: platform_driver or something else
         self.native_driver = None
 
@@ -44,20 +68,19 @@ class BaseCustomDriver(object):
         log.warning(f"Implement me: {__name__}.")
         pass
 
-    def _start(self, driver_to_start: DriverType):
+    def _start(self,):
         # Warn if new driver doesn't have this method implemented.
         log.warning(f"Implement me: {__name__}. Return type should be callable object;"
                     f"able to .open_app and control the platform overall. See .start method.")
         pass
 
-    def start(self, driver_to_start: DriverType, headless=False):
-        self.locator_type = driver_to_start.locator_type
-        log.info(f"Starting platform and driver: {driver_to_start.name}")
+    def start(self, headless=False):
+        log.info(f"Starting platform and driver: {self.locator_type, self.name}")
         # run method returned by _start and pass arguments to it
-        self.native_driver = self._start(driver_to_start)(headless=headless, **self._process_args())
+        self.native_driver = self._start()(headless=headless, **self._process_args())
         return self
 
-    def _open_app(self,):
+    def _open_app(self, **kwargs):
         # Warn if new driver doesn't have this method implemented.
         log.warning(f"Implement me: {__name__}.")
         pass

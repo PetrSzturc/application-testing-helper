@@ -10,26 +10,14 @@ log = logging.getLogger(__name__)
 
 
 class CustomPlaywright(BaseCustomDriver):
-    # Wrap around existing Playwright to customise it for running inside this framework
+    """Wrap around existing Playwright to customise it for running inside this framework
+    """
 
     def _remap_methods(self, obj):
 
         # Can be called only after new_page is called
         obj.go_to = obj.goto
         return obj
-
-    # def _start(
-    #             self,
-    #             driver_to_start  #: DriverType,
-    #             ):
-    #     # Start playwright
-    #     self.playwright = sync_playwright().start()
-    #     browser_launcher = {
-    #         Drivers.FIREFOX: self.playwright.firefox,
-    #         Drivers.CHROMIUM: self.playwright.chromium,
-    #         Drivers.WEBKIT: self.playwright.webkit,
-    #     }.get(driver_to_start, self.playwright.firefox)
-    #     return browser_launcher.launch
 
     def _open_app(self, url: str):
         # TODO Rewrite this with loading url from configuration
@@ -48,11 +36,30 @@ class CustomPlaywright(BaseCustomDriver):
 
 
 class Firefox(CustomPlaywright):
+    name = 'firefox'
+    locator_type = 'browser'
 
-    def _start(
-                self,
-                driver_to_start  #: DriverType,
-                ):
+    def _start(self,):
         # Start playwright
         self.playwright = sync_playwright().start()
         return self.playwright.firefox.launch
+
+
+class Chromium(CustomPlaywright):
+    name = 'chromium'
+    locator_type = 'browser'
+
+    def _start(self,):
+        # Start playwright
+        self.playwright = sync_playwright().start()
+        return self.playwright.chromium.launch
+
+
+class Webkit(CustomPlaywright):
+    name = 'webkit'
+    locator_type = 'browser'
+
+    def _start(self,):
+        # Start playwright
+        self.playwright = sync_playwright().start()
+        return self.playwright.webkit.launch

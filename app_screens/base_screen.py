@@ -3,4 +3,4 @@ class BaseScreen(object):
                  self,
                  app,  #: application.AppUi
                  ):
-        self.native_driver = app.native_driver
+        self.platform_driver = app.platform_driver

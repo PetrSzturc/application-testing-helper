@@ -1,25 +1,36 @@
+import logging
+
 # from appium import webdriver as appium_driver
 
-from drivers.drivers import DriverType
-# from drivers.playwright_wrapper import CustomPlaywright
-from drivers.playwright_wrapper import Firefox
+from drivers.playwright_wrapper import Firefox, Chromium, Webkit
 
 
-class Drivers(object):
+log = logging.getLogger(__name__)
+
+
+class RegisteredDrivers(object):
     # TODO should some of this be just inside all the drivers...?
-    # TODO Rename to drivers configuration?
+    # TODO Move this into .yaml if reasonable
     # Maps drivers for later use
     # Impacts how drivers are started and locators are resolved
     BROWSER = "browser"
-    FIREFOX = DriverType(BROWSER, "firefox", Firefox)
-    # CHROMIUM = DriverType(BROWSER, "chromium", CustomPlaywright)
-    # WEBKIT = DriverType(BROWSER, "webkit", CustomPlaywright)
-    # IOS = DriverType("ios", "ios", appium_driver)
-    # ANDROID = DriverType("android", "android", appium_driver)
+    CHROMIUM = Chromium
+    FIREFOX = Firefox
+    WEBKIT = Webkit
+    # IOS = Ios
+    # ANDROID = Android
     all = (
         FIREFOX,
-        # CHROMIUM,
-        # WEBKIT,
+        CHROMIUM,
+        WEBKIT,
         # IOS,
         # ANDROID,
         )
+
+    @classmethod
+    def get_driver_by_name(cls, driver_name: str):
+        try:
+            return {driver.name: driver for driver in cls.all}[driver_name]
+        except KeyError:
+            log.error(f"Platform driver not found or configured properly: '{driver_name}'")
+            # exit properly
