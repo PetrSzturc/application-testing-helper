@@ -9,11 +9,9 @@ log = logging.getLogger(__name__)
 
 
 class RegisteredDrivers(object):
-    # TODO should some of this be just inside all the drivers...?
+    """Contains drivers ready for use in tests.
+    """
     # TODO Move this into .yaml if reasonable
-    # Maps drivers for later use
-    # Impacts how drivers are started and locators are resolved
-    BROWSER = "browser"
     CHROMIUM = Chromium
     FIREFOX = Firefox
     WEBKIT = Webkit
@@ -33,4 +31,4 @@ class RegisteredDrivers(object):
             return {driver.name: driver for driver in cls.all}[driver_name]
         except KeyError:
             log.error(f"Platform driver not found or configured properly: '{driver_name}'")
-            # exit properly
+            # TODO exit properly

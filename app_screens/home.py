@@ -14,6 +14,6 @@ class HomeScreen(BaseScreen):
         self.SEARCH_FIELD.fill(term)
         self.SEARCH_FIELD.press("Enter")
 
-    def wait_for_search_results(self):
+    def wait_for_search_results(self,):
         # sleep(2)
         pass

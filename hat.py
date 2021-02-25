@@ -14,6 +14,6 @@ class Hat(object):
     def __init__(self,):
         pass
 
-    def start_platform(self, driver_to_start: str, **kwargs):
+    def start_platform_driver(self, driver_to_start: str, **kwargs):
         driver = RegisteredDrivers.get_driver_by_name(driver_to_start)
         return driver().start(**kwargs)

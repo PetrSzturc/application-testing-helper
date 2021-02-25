@@ -1,6 +1,7 @@
 class BaseScreen(object):
     def __init__(
                  self,
-                 app,  #: application.AppUi
+                 platform_driver
                  ):
-        self.platform_driver = app.platform_driver
+        # Platform driver is needed here, so that later .get_element methods can call it.
+        self.platform_driver = platform_driver
