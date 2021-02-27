@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 
 class Hat(object):
-    """Runner and coordinator, controls running individual platforms and their drivers\n
+    """Runner, controls running individual platforms and their drivers\n
     Sits on top - hence the name. Plus hat=helper for application testing, haha.
     """
     # TODO Add loading configuration and adding it here
