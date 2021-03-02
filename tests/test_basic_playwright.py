@@ -21,7 +21,7 @@ def hat():
 @fixture
 def platform_driver(hat: Hat):
     log.info(f"Starting platform and driver.")
-    return hat.start_platform_driver('chromium', headless=True)
+    return hat.start_platform_driver('chromium', headless=False)
 
 
 @fixture
