@@ -12,15 +12,15 @@ RUN sudo apt-get update -q
 
 # Install Playwright dependencies
 # Prepopulate debconf, otherwise gitpod stucks waiting for input
-RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
-RUN sudo apt-get install -yq \
-    cmake fakeroot g++ gettext git libgtest-dev \
-    libcurl4-openssl-dev libqrencode-dev  libssl-dev libuuid1 \
-    libwxgtk3.0-gtk3-dev libxerces-c-dev libxt-dev libxtst-dev \
-    libykpers-1-dev libyubikey-dev make pkg-config uuid-dev zip \
-    libmagic-dev
-# Set debconf back to normal.
-RUN echo 'debconf debconf/frontend select Dialog' | sudo debconf-set-selections
+# RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
+# RUN sudo apt-get install -yq \
+#     cmake fakeroot g++ gettext git libgtest-dev \
+#     libcurl4-openssl-dev libqrencode-dev  libssl-dev libuuid1 \
+#     libwxgtk3.0-gtk3-dev libxerces-c-dev libxt-dev libxtst-dev \
+#     libykpers-1-dev libyubikey-dev make pkg-config uuid-dev zip \
+#     libmagic-dev
+# # Set debconf back to normal.
+# RUN echo 'debconf debconf/frontend select Dialog' | sudo debconf-set-selections
 
 RUN sudo apt-get install -yq --no-install-recommends xvfb
 

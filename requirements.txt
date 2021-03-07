@@ -5,4 +5,4 @@ python-box
 PyYAML
 
 Appium-Python-Client
-playwright==1.8.0a1
+playwright
