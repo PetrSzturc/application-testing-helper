@@ -76,11 +76,10 @@ RUN sudo apt-get install -yq --no-install-recommends \
     libxtst6
 
 # - Firefox
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN sudo apt-get install -yq --no-install-recommends \
     libdbus-glib-1-2 \
     libxt6 \
     ffmpeg
-
 
 # - Browsers headful mode
 RUN sudo apt-get install -yq --no-install-recommends xvfb
