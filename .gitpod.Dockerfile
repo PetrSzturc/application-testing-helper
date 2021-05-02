@@ -59,7 +59,6 @@ RUN sudo apt-get install -yq --no-install-recommends \
 RUN sudo apt-get install -yq --no-install-recommends xvfb
 
 # Environment setup
-RUN echo $PWD
-RUN pwd
-RUN pipenv install --dev
-RUN pipenv run playwright install
+RUN echo $GITPOD_REPO_ROOT
+RUN $GITPOD_REPO_ROOT/pipenv install --dev
+RUN $GITPOD_REPO_ROOT/pipenv run playwright install
