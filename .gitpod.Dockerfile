@@ -56,3 +56,6 @@ RUN sudo apt-get install -yq --no-install-recommends \
 
 # - Browsers headful mode
 RUN sudo apt-get install -yq --no-install-recommends xvfb
+
+# Install poetry
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -

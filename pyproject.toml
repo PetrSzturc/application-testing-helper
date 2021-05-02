@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "hat"
+version = "2021.0a"
+description = "Helper for automated testing"
+authors = ["Petr Szturc <szt.pracovni1@gmail.com>"]
+license = "None"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.25.1"
+Appium-Python-Client = "^1.1.0"
+playwright = "^1.10.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.3"
+pylama = "^7.7.1"
+PyYAML = "^5.4.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

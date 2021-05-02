@@ -1,7 +1,11 @@
 #!/bin/sh
 
-pipenv install --dev
+export PATH="~/.poetry/bin:$PATH"
 
-pipenv run playwright install
+export PIP_USER=false
 
-pipenv run pytest
+poetry install
+
+poetry run playwright install
+
+poetry run pytest
