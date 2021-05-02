@@ -8,7 +8,8 @@ FROM gitpod/workspace-full-vnc
 
 USER gitpod
 
-RUN sudo apt-get update -q 
+RUN sudo apt-get update -q
+RUN sudo apt-get upgrade -yq
 
 # Install Playwright dependencies
 
@@ -58,5 +59,7 @@ RUN sudo apt-get install -yq --no-install-recommends \
 RUN sudo apt-get install -yq --no-install-recommends xvfb
 
 # Environment setup
+RUN echo $PWD
+RUN pwd
 RUN pipenv install --dev
 RUN pipenv run playwright install
