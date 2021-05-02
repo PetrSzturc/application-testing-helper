@@ -56,3 +56,7 @@ RUN sudo apt-get install -yq --no-install-recommends \
 
 # - Browsers headful mode
 RUN sudo apt-get install -yq --no-install-recommends xvfb
+
+# Environment setup
+RUN pipenv install --dev
+RUN pipenv run playwright install

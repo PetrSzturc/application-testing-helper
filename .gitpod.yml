@@ -1,9 +1,9 @@
 image:
   file: .gitpod.Dockerfile
 
-tasks:
-  - name: Terminal
-    command: source .gitpod_setup.sh
+# tasks:
+#   - name: Terminal
+#     command: source .gitpod_setup.sh
 
 ports:
   - port: 6080
