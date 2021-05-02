@@ -1,3 +1,4 @@
 {
     "python.venvPath": "~/.cache/pypoetry/virtualenvs",
+    "python.pythonPath": "/home/gitpod/.cache/pypoetry/virtualenvs/hat-NQz9dw6e-py3.8/bin/python",
 }
